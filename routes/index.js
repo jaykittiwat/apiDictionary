@@ -8,7 +8,7 @@ router.post('/dictionary', controllers.createDictionary_Catalog);
 router.post('/dictionary/:slug', controllers.creatDictionary_Wordlist);
 router.put('/dictionary/:slug', controllers.updateDictionary_Wordlist);
 router.put('/dictionary/:slug', controllers.updateDictionaryList);
-router.delete('/dictionary/:slug', controllers.deleteDictionary);
+router.delete('/dictionary', controllers.deleteDictionary);
 
 
 

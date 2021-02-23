@@ -26,26 +26,28 @@ exports.createDictionary_Catalog = (req, res) => {
 exports.creatDictionary_Wordlist = (req, res) => {
     const branch = req.params
     const data = req.body
-    console.log(branch)
-  /*  Gitservice.commitFile_onBranch(branch, data[0],result=>{
+    //console.log(branch)
+    Gitservice.commitFile_onBranch(branch, data[0],result=>{
         res.json(result)
-    })*/
+    })
 }
 //update รายการคำศัพท์
 exports.updateDictionary_Wordlist = (req, res) => {
-    const branchName = req.params.slug
+    const branch = req.params
     const data = req.body
-    Gitservice.addNewCommit_onBranch(branchName, data[0])
+    Gitservice.commitFile_onBranch(branch, data[0],result=>{
+        res.json(result)
+    })
 }
 //update ชื่อหมวดหมู่่
 exports.updateDictionaryList = (req, res) => {
-    const branchName = req.params.slug
-    const data = req.body
-    Gitservice.addNewCommit_onBranch(branchName, data[0])
+    
 }
 //delete ลบdictionary
 exports.deleteDictionary = (req, res) => {
-    Gitservice.delete_onbranch(branchName, result => {
+    const branch =req.body
+   
+    Gitservice.delete_onbranch(branch, result => {
         res.json(result)
     })
 }
