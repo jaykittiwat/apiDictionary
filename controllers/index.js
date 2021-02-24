@@ -5,8 +5,9 @@ const { reset } = require("nodemon")
 
 //get รายการ
 exports.getDictionaryList = (req, res) => {
-    Gitservice.branch(result=>{
-        console.log(result)
+    Gitservice.tag(result=>{
+    const data=  Generalservice.makeJosnTree(result)
+    res.json(data)
     })
 }
 //get เนื้อหารายการคำศัพท์
@@ -35,13 +36,17 @@ exports.creatDictionary_Wordlist = (req, res) => {
 exports.updateDictionary_Wordlist = (req, res) => {
     const branch = req.params
     const data = req.body
-    Gitservice.commitFile_onBranch(branch, data[0],result=>{
+    Gitservice.commitNewFile_onBranch(branch, data[0],result=>{
         res.json(result)
     })
 }
 //update ชื่อหมวดหมู่่
 exports.updateDictionaryList = (req, res) => {
-    
+    const oldName=req.body.oldName
+    const newName=req.body.newName
+    Gitservice.changeBranchName(oldName,newName,result=>{
+        res.json(result)
+    })
 }
 //delete ลบdictionary
 exports.deleteDictionary = (req, res) => {
