@@ -20,9 +20,8 @@ exports.convertString = (data) => {
     return result
 
 }
-
+//สร้างjoson tree
 exports.makeJosnTree = (dataObj) => {
-    //console.log(dataObj);
     const data = dataObj.splPath
     const orinaltag = dataObj.origiPath
     const title = dataObj.title

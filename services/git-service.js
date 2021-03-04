@@ -1,26 +1,14 @@
 const { exec, execSync } = require('child_process');
 const CL = require('../model/commanline')
-const fileName = 'document.txt'
-const Generalservice = require('./general-service')
 
+
+const Generalservice = require('./general-service')
+const fileName = 'document.txt'
 const changeTag = (oldName, newName) => {
     const newTag = oldName.tag.replace("/" + oldName.slug, "/" + newName.slug);
     return newTag
 }
 const Topparent = ['mainBranch', 'subBranch']//ห้ามซ้ำกับชื่อ tag =[main,sub]
-
-const applyarr = (arr) => {
-    var text = null
-    for (let i = 0; i < arr.length; i++) {
-        if (text === null) {
-            text = arr[i]
-        }
-        else {
-            text = text + " " + arr[i]
-        }
-    }
-    return text
-}
 
 //ตัวสร้าง  bracnh master,sub,main(เอาไว้เทส  ควรที่จะสร้างไฟล์ git ที่มีbranch main , sub ไว้ก่อน เพราะต้องส่งไปให้ UI ก่อน) 
 exports.check_Directory = (callback) => {
@@ -68,6 +56,7 @@ exports.check_Directory = (callback) => {
 }
 //สร้าง branch
 exports.create_Branch = (newBranch, parentBranch, callback) => {
+   
     exec('git checkout -b ' + newBranch.slug + " " + parentBranch.slug + " && " + 'git commit --allow-empty -m' + '"' + newBranch.title + '"', { cwd: CL.path }, (error, stdout, stderr) => {
         if (error === null) {
             exec('git tag ' + 'x/' + parentBranch.tag + '/' + newBranch.slug, { cwd: CL.path }, (error, stdout, stderr) => {
@@ -121,7 +110,7 @@ exports.delete_onbranch = (branch, callback) => {
             })
         }
         else {
-            callback(stderr)
+            callback(error)
         }
     })
 }
@@ -174,6 +163,7 @@ exports.tag = (callback) => {
                 arrSpl.forEach(ele => {
                     if (ele !== '') {
                         splTag.push(ele)
+
                     }
                 });
 
@@ -192,25 +182,65 @@ exports.tag = (callback) => {
     })
 
 }
+//merge file
+exports.mergeFile = (userID,arrBranch, callback) => {
+    //ต้อง merge  branch 2 ก่อนเพื่อcommit
+    mergeIndexOneAndTwo(userID,arrBranch, result => {
+        let i = 0
+        for (i; i < arrBranch.length; i++) {
+            if (i > 1) {
+                mergeProcess(arrBranch[i])
+            }
+        }
+        exec('grep -v -e"^<<<<<<<" -e "^>>>>>>>" -e"=======" document.txt > document.tmp' + ' && ' + 'mv document.tmp document.txt', { cwd: CL.path }, (error, stdout, stderr) => { 
+            exec('git add . && git commit --allow-empty-message -m" "', { cwd: CL.path }, (error, stdout, stderr) => {
+                callback(CL.path+'/'+fileName)
+            })
+            
+        })
+    })
+}
+//request แค่หมวดเดียว
+exports.onlyOneBranchDowload=(arr,callback)=>{
+exec('git checkout '+arr[0], { cwd: CL.path }, (error, stdout, stderr)=>{
+    callback(CL.path+'/'+fileName)
+})
+}
 
-exports.mergeFile = (arrBranch, callback) => {
-    exec('git checkout -b mergeFile master', { cwd: CL.path }, (error, stdout, stderr) => {
-        exec('git merge ' + applyarr(arrBranch), { cwd: CL.path }, (error, stdout, stderr) => {
-            exec('grep -v -e"^<<<<<<<" -e "^>>>>>>>" -e"=======" document.txt > document.tmp' + ' && ' + 'mv document.tmp document.txt', { cwd: CL.path }, (error, stdout, stderr) => {
-                exec('git add . && git commit -a --allow-empty-message -m" "',{ cwd: CL.path }, (error, stdout, stderr) =>{
-                    callback(true)
+const mergeIndexOneAndTwo = (userID,arrBranch, callback) => {
+    const defaltName='mergeFile_'+userID
+    exec('git checkout -b '+defaltName+' master', { cwd: CL.path }, (error, stdout, stderr) => {
+
+        exec('git merge ' + arrBranch[0], { cwd: CL.path }, (error, stdout, stderr) => {
+
+            exec('git merge ' + arrBranch[1], { cwd: CL.path }, (error, stdout, stderr) => {
+
+                exec('grep -v -e"^<<<<<<<" -e "^>>>>>>>" -e"=======" document.txt > document.tmp' + ' && ' + 'mv document.tmp document.txt', { cwd: CL.path }, (error, stdout, stderr) => {
+
+                    exec('git add . && git commit --allow-empty-message -m" "', { cwd: CL.path }, (error, stdout, stderr) => {
+                        callback(true)
+                    })
                 })
             })
         })
     })
 }
 
-exports.readFile=(branchName,callback)=>{
-exec('git checkout '+branchName+' && '+'cat document.txt',{ cwd: CL.path }, (error, stdout, stderr)=>{
-    callback([stdout])
-})
+//แก้ปัญหา conflig  ต้องการแบบSync[b1,b2]<----b3,<-----b4
+const mergeProcess = (branch) => {
+    try {
+        execSync('git merge ' + branch, { cwd: CL.path })
+        execSync('git add . && git commit --allow-empty-message -m" "', { cwd: CL.path })
+    } catch (ex) {
+        execSync('git add . && git commit --allow-empty-message -m" "', { cwd: CL.path })
+        execSync('git merge ' + branch, { cwd: CL.path })
+    }
 }
-
+exports.readFile = (branchName, callback) => {
+    exec('git checkout ' + branchName + ' && ' + 'cat document.txt', { cwd: CL.path }, (error, stdout, stderr) => {
+        callback([stdout])
+    })
+}
 
 
 

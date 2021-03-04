@@ -1,6 +1,7 @@
 
 const Gitservice = require("../services/git-service")
 const Generalservice = require("../services/general-service")
+const CL = require('../model/commanline');
 
 //get รายการ
 exports.getDictionaryList = (req, res) => {
@@ -11,10 +12,9 @@ exports.getDictionaryList = (req, res) => {
 }
 //get เนื้อหารายการคำศัพท์
 exports.getDictionary_detail = (req, res) => {
-    console.log(req.params);
-  Gitservice.readFile(req.params.slug,result=>{
-      res.json(result)
-  })
+    Gitservice.readFile(req.params.slug, result => {
+        res.json(result)
+    })
 }
 //create หมวด
 exports.createDictionary_Catalog = (req, res) => {
@@ -29,7 +29,6 @@ exports.createDictionary_Catalog = (req, res) => {
 exports.creatDictionary_Wordlist = (req, res) => {
     const branch = req.params
     const data = req.body
-    //console.log(branch)
     Gitservice.commitFile_onBranch(branch, data[0], result => {
         res.json(result)
     })
@@ -53,22 +52,28 @@ exports.updateDictionaryList = (req, res) => {
 //delete ลบdictionary
 exports.deleteDictionary = (req, res) => {
     const branch = req.body
-
     Gitservice.delete_onbranch(branch, result => {
         res.json(result)
     })
 }
+//mergeFile
 exports.getDictionary_merge = (req, res) => {
-    const result = Generalservice.querySlug_Service(req)
-    Gitservice.mergeFile(result, resultCal => {
-        if (resultCal) {
-            //console.log('create file success');
-            const pathFile='/home/jaykittiwat/Dictionary-server/Dictionary_DB'//ไฟล์ที่จะทำการdownload
-            var filePath = pathFile; // Or format the path using the `id` rest param
-            var fileName = "/document.txt"; // The default name the browser will use
-            res.download(filePath, fileName)
-            res.json('download')
-        }
+    const arr = Generalservice.querySlug_Service(req)
+    const userID = "jay123"
+    const dataDelete = { slug: "mergeFile_" + userID, tag: " " }//"mergeFile_" เป็นdefalt ถ้าจะแก้  ไปแก้ใน Gitservice.mergeFile 
+   if(arr.length>1){
+    Gitservice.mergeFile(userID, arr, result => {
+        res.sendFile(result);
+        Gitservice.delete_onbranch(dataDelete, result => {
+            console.log(result);
+        })
     })
+}
+if(arr.length===1){
+    //ดึกไฟล์จากbranch ตรงๆ
+    Gitservice.onlyOneBranchDowload(arr,result=>{
+        res.sendFile(result);
+    })
+}
 }
 

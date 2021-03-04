@@ -3,7 +3,11 @@ const git_config = {
     username: "jaykittiwat"
 }
 
-exports.path = '/home/jaykittiwat/Dictionary-server/Dictionary_DB'
+var path = require("path");
+
+exports.path = path.resolve("./Dictionary_DB")
+
+
 
 exports.gitConfig = {
     emailAndUsername: 'git config --global user.email ' + git_config.email + ' && ' + 'git config --global user.name ' + git_config.username,
