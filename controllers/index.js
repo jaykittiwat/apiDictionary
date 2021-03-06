@@ -58,22 +58,26 @@ exports.deleteDictionary = (req, res) => {
 }
 //mergeFile
 exports.getDictionary_merge = (req, res) => {
-    const arr = Generalservice.querySlug_Service(req)
-    const userID = "jay123"
+    const arr=req.params.slug.split(",")
+    const Filter=Gitservice.removeBranchEmtyFile(arr)
+    var userID = req.params.userID
+   
     const dataDelete = { slug: "mergeFile_" + userID, tag: " " }//"mergeFile_" เป็นdefalt ถ้าจะแก้  ไปแก้ใน Gitservice.mergeFile 
-   if(arr.length>1){
-    Gitservice.mergeFile(userID, arr, result => {
-        res.sendFile(result);
-        Gitservice.delete_onbranch(dataDelete, result => {
-            console.log(result);
+    if ( Filter.length > 1) {
+        Gitservice.mergeFile(userID,  Filter, result => {
+            res.sendFile(result);
+            setTimeout(() => {
+                Gitservice.delete_onbranch(dataDelete, result => {
+                    console.log(result);
+                })
+            }, 500);
         })
-    })
-}
-if(arr.length===1){
-    //ดึกไฟล์จากbranch ตรงๆ
-    Gitservice.onlyOneBranchDowload(arr,result=>{
-        res.sendFile(result);
-    })
-}
+    }
+    if ( Filter.length === 1) {
+        //ดึกไฟล์จากbranch ตรงๆ
+        Gitservice.onlyOneBranchDowload( Filter, result => {
+            res.sendFile(result);
+        })
+    }
 }
 

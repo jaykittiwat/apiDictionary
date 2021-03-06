@@ -61,7 +61,7 @@ exports.create_Branch = (newBranch, parentBranch, callback) => {
         if (error === null) {
             exec('git tag ' + 'x/' + parentBranch.tag + '/' + newBranch.slug, { cwd: CL.path }, (error, stdout, stderr) => {
                 if (error === null) {
-                    callback('git tag sucess already in firtst commit')
+                    callback('success')
                 }
             })
         }
@@ -72,6 +72,7 @@ exports.create_Branch = (newBranch, parentBranch, callback) => {
 }
 //เพิ่ม file and commit
 exports.commitFile_onBranch = (branch, data, callback) => {
+    console.log(data);
     exec('git checkout ' + branch.slug + ' && ' + 'echo  ' + "'" + data + "'" + ">" + fileName, { cwd: CL.path }, (error, stdout, stderr) => {
         if (error === null) {
             exec('git add .' + ' && ' + 'git commit --allow-empty-message -m" " ', { cwd: CL.path }, (error, stdout, stderr) => {
@@ -240,6 +241,24 @@ exports.readFile = (branchName, callback) => {
     exec('git checkout ' + branchName + ' && ' + 'cat document.txt', { cwd: CL.path }, (error, stdout, stderr) => {
         callback([stdout])
     })
+}
+exports.removeBranchEmtyFile=(arr)=>{
+    
+    var arrfilter=[]
+    let i=0
+    for( i;i<arr.length;i++){
+       // console.log(arr[i]);
+        var result = execSync('git show --pretty="" --name-only ' + arr[i], { cwd: CL.path }).toString()
+    var x= result.replace("\n", "")
+        if(x === 'document.txt'){
+            console.log(x);
+            arrfilter.push(arr[i])
+         
+        }
+    }
+    
+return arrfilter
+
 }
 
 
