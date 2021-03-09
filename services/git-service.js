@@ -1,7 +1,6 @@
 const { exec, execSync } = require('child_process');
+const { format } = require('path');
 const CL = require('../model/commanline')
-
-
 const Generalservice = require('./general-service')
 const fileName = 'document.txt'
 const changeTag = (oldName, newName) => {
@@ -56,12 +55,15 @@ exports.check_Directory = (callback) => {
 }
 //สร้าง branch
 exports.create_Branch = (newBranch, parentBranch, callback) => {
-   
+
     exec('git checkout -b ' + newBranch.slug + " " + parentBranch.slug + " && " + 'git commit --allow-empty -m' + '"' + newBranch.title + '"', { cwd: CL.path }, (error, stdout, stderr) => {
         if (error === null) {
             exec('git tag ' + 'x/' + parentBranch.tag + '/' + newBranch.slug, { cwd: CL.path }, (error, stdout, stderr) => {
                 if (error === null) {
-                    callback('success')
+                    this.tag(result => {
+                        const data = Generalservice.makeJosnTree(result)
+                        callback(data)
+                    })
                 }
             })
         }
@@ -84,7 +86,7 @@ exports.commitFile_onBranch = (branch, data, callback) => {
         }
     })
 }
-//update branch
+//update ชื่อ  branch  ยังไม่ได้ใช้
 exports.commitNewFile_onBranch = (branch, data, callback) => {
     exec('git checkout ' + branch.slug + ' && ' + 'echo  ' + "'" + data + "'" + ">" + fileName, { cwd: CL.path }, (error, stdout, stderr) => {
         if (error === null) {
@@ -97,22 +99,43 @@ exports.commitNewFile_onBranch = (branch, data, callback) => {
         }
     })
 }
+
+
 //ลบ branch & tag
 exports.delete_onbranch = (branch, callback) => {
-    exec('git checkout master', { cwd: CL.path }, (error, stdout, stderr) => {
-        if (error === null) {
-            exec('git branch -D ' + branch.slug + " && " + 'git tag -d ' + branch.tag, { cwd: CL.path }, (error, stdout, stderr) => {
-                if (error === null) {
-                    callback("deleted")
-                }
-                else {
-                    callback(error)
-                }
+
+    searchBranchByTag(branch, result => {
+        const arrtag = result.arrTag
+        const arrBranch = result.arrBranch
+        for (let i = 0; i < arrBranch.length; i++) {
+            exec('git checkout master', { cwd: CL.path }, (error, stdout, stderr) => {
+                exec('git branch -D ' + arrBranch[i] + " && " + 'git tag -d ' + arrtag[i], { cwd: CL.path }, (error, stdout, stderr) => {
+                })
             })
         }
-        else {
-            callback(error)
-        }
+        callback("deleted");
+    })
+
+}
+//หาbranch โดยใช้tag
+const searchBranchByTag = (branch, callback) => {
+    exec('git tag -l ' + '"*' + branch.tag + '*"', { cwd: CL.path }, (error, stdout, stderr) => {
+
+        const resultTag = Generalservice.convertString(stdout)
+        const branch = []
+        resultTag.forEach(element => {
+            const x = element.split('/')
+            x.forEach((element, index) => {
+                if (index === x.length - 1) {
+                    branch.push(element)
+                }
+            });
+
+        });
+        callback({ arrTag: resultTag, arrBranch: branch })
+
+
+
     })
 }
 
@@ -169,48 +192,44 @@ exports.tag = (callback) => {
                 });
 
             });
-
             callback({
                 splPath: splTag,
                 origiPath: orinaltag,
                 title: title,
                 fileDict: file
             })
-
-
-
         }
     })
 
 }
 //merge file
-exports.mergeFile = (userID,arrBranch, callback) => {
+exports.mergeFile = (userID, arrBranch, callback) => {
     //ต้อง merge  branch 2 ก่อนเพื่อcommit
-    mergeIndexOneAndTwo(userID,arrBranch, result => {
+    mergeIndexOneAndTwo(userID, arrBranch, result => {
         let i = 0
         for (i; i < arrBranch.length; i++) {
             if (i > 1) {
                 mergeProcess(arrBranch[i])
             }
         }
-        exec('grep -v -e"^<<<<<<<" -e "^>>>>>>>" -e"=======" document.txt > document.tmp' + ' && ' + 'mv document.tmp document.txt', { cwd: CL.path }, (error, stdout, stderr) => { 
+        exec('grep -v -e"^<<<<<<<" -e "^>>>>>>>" -e"=======" document.txt > document.tmp' + ' && ' + 'mv document.tmp document.txt', { cwd: CL.path }, (error, stdout, stderr) => {
             exec('git add . && git commit --allow-empty-message -m" "', { cwd: CL.path }, (error, stdout, stderr) => {
-                callback(CL.path+'/'+fileName)
+                callback(CL.path + '/' + fileName)
             })
-            
+
         })
     })
 }
 //request แค่หมวดเดียว
-exports.onlyOneBranchDowload=(arr,callback)=>{
-exec('git checkout '+arr[0], { cwd: CL.path }, (error, stdout, stderr)=>{
-    callback(CL.path+'/'+fileName)
-})
+exports.onlyOneBranchDowload = (arr, callback) => {
+    exec('git checkout ' + arr[0], { cwd: CL.path }, (error, stdout, stderr) => {
+        callback(CL.path + '/' + fileName)
+    })
 }
-
-const mergeIndexOneAndTwo = (userID,arrBranch, callback) => {
-    const defaltName='mergeFile_'+userID
-    exec('git checkout -b '+defaltName+' master', { cwd: CL.path }, (error, stdout, stderr) => {
+//merge 2 branch แรกก่อน เพื่อสร้างcommit
+const mergeIndexOneAndTwo = (userID, arrBranch, callback) => {
+    const defaltName = 'mergeFile_' + userID
+    exec('git checkout -b ' + defaltName + ' master', { cwd: CL.path }, (error, stdout, stderr) => {
 
         exec('git merge ' + arrBranch[0], { cwd: CL.path }, (error, stdout, stderr) => {
 
@@ -242,22 +261,22 @@ exports.readFile = (branchName, callback) => {
         callback([stdout])
     })
 }
-exports.removeBranchEmtyFile=(arr)=>{
-    
-    var arrfilter=[]
-    let i=0
-    for( i;i<arr.length;i++){
-       // console.log(arr[i]);
+exports.removeBranchEmtyFile = (arr) => {
+
+    var arrfilter = []
+    let i = 0
+    for (i; i < arr.length; i++) {
+        // console.log(arr[i]);
         var result = execSync('git show --pretty="" --name-only ' + arr[i], { cwd: CL.path }).toString()
-    var x= result.replace("\n", "")
-        if(x === 'document.txt'){
+        var x = result.replace("\n", "")
+        if (x === 'document.txt') {
             console.log(x);
             arrfilter.push(arr[i])
-         
+
         }
     }
-    
-return arrfilter
+
+    return arrfilter
 
 }
 

@@ -53,7 +53,7 @@ exports.updateDictionaryList = (req, res) => {
 exports.deleteDictionary = (req, res) => {
     const branch = req.body
     Gitservice.delete_onbranch(branch, result => {
-        res.json(result)
+      res.json(result)
     })
 }
 //mergeFile
@@ -79,5 +79,7 @@ exports.getDictionary_merge = (req, res) => {
             res.sendFile(result);
         })
     }
+
+    
 }
 

@@ -6,9 +6,9 @@ router.get('/dictionary', controllers.getDictionaryList);
 router.get('/dictionary/search/:slug', controllers.getDictionary_detail);
 router.get('/dictionary/merge/:userID/:slug', controllers.getDictionary_merge);
 router.post('/dictionary', controllers.createDictionary_Catalog);
-router.post('/dictionary/remove', controllers.deleteDictionary);
+router.post('/dictionary/remove', controllers.deleteDictionary);//ลบหมวด ต้องส่ง body
 router.post('/dictionary/:slug', controllers.creatDictionary_Wordlist);
-router.put('/dictionary/:slug', controllers.updateDictionary_Wordlist);
+router.put('/dictionary/:slug', controllers.updateDictionary_Wordlist);//ไม่ได้ใช้ ใช้post แทน
 router.put('/dictionary', controllers.updateDictionaryList);
 
 
