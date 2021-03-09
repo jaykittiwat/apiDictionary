@@ -60,10 +60,7 @@ exports.create_Branch = (newBranch, parentBranch, callback) => {
         if (error === null) {
             exec('git tag ' + 'x/' + parentBranch.tag + '/' + newBranch.slug, { cwd: CL.path }, (error, stdout, stderr) => {
                 if (error === null) {
-                    this.tag(result => {
-                        const data = Generalservice.makeJosnTree(result)
-                        callback(data)
-                    })
+                   callback("success")
                 }
             })
         }
@@ -74,7 +71,7 @@ exports.create_Branch = (newBranch, parentBranch, callback) => {
 }
 //เพิ่ม file and commit
 exports.commitFile_onBranch = (branch, data, callback) => {
-    console.log(data);
+ 
     exec('git checkout ' + branch.slug + ' && ' + 'echo  ' + "'" + data + "'" + ">" + fileName, { cwd: CL.path }, (error, stdout, stderr) => {
         if (error === null) {
             exec('git add .' + ' && ' + 'git commit --allow-empty-message -m" " ', { cwd: CL.path }, (error, stdout, stderr) => {
@@ -166,7 +163,7 @@ exports.changeBranchName = (oldName, newName, callback) => {
 
     })
 }
-//หาแท็ก
+//หาแท็กเอาไปสร้าง json tree
 exports.tag = (callback) => {
     var splTag = []
     var orinaltag = []

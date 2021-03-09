@@ -20,6 +20,7 @@ const header = (req, res, next) => {
 
 app.use(bodyParser.json());
 const myLogger = (req, res, next) => {
+  //ดูว่ามีbranch master หรือยัง
   service.check_Directory(result => {
     if (result) {
       next()
