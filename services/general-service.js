@@ -23,6 +23,7 @@ exports.convertString = (data) => {
 //สร้างjoson tree
 exports.makeJosnTree = (dataObj) => {
     const data = dataObj.splPath
+    console.log(data);
     const orinaltag = dataObj.origiPath
     const title = dataObj.title
     const fileDict = dataObj.fileDict
