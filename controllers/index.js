@@ -1,7 +1,7 @@
 
 const Gitservice = require("../services/git-service")
 const Generalservice = require("../services/general-service")
-const CL = require('../model/commanline');
+
 
 //get รายการ
 exports.getDictionaryList = (req, res) => {
@@ -33,14 +33,7 @@ exports.creatDictionary_Wordlist = (req, res) => {
         res.json(result)
     })
 }
-//update รายการคำศัพท์
-exports.updateDictionary_Wordlist = (req, res) => {
-    const branch = req.params
-    const data = req.body
-    Gitservice.commitNewFile_onBranch(branch, data[0], result => {
-        res.json(result)
-    })
-}
+
 //update ชื่อหมวดหมู่่
 exports.updateDictionaryList = (req, res) => {
     const oldName = req.body.oldName
@@ -59,15 +52,17 @@ exports.deleteDictionary = (req, res) => {
 //mergeFile
 exports.getDictionary_merge = (req, res) => {
     const arr=req.params.slug.split(",")
-    const Filter=Gitservice.removeBranchEmtyFile(arr)
+    const Filter=Gitservice.removeBranchEmtyFile(arr)//ลบbranch ที่ไม่มีไฟล์
     var userID = req.params.userID
    
-    const dataDelete = { slug: "mergeFile_" + userID, tag: " " }//"mergeFile_" เป็นdefalt ถ้าจะแก้  ไปแก้ใน Gitservice.mergeFile 
+    const dataDelete = { slug: "mergeFile_" + userID }//สร้างbranch mergeให้แต่ละuser
     if ( Filter.length > 1) {
         Gitservice.mergeFile(userID,  Filter, result => {
+            //ส่งไฟล์
             res.sendFile(result);
+            //0.5วิ หลัง ส่งไฟล์ ทำการลบ branch
             setTimeout(() => {
-                Gitservice.delete_onbranch(dataDelete, result => {
+                Gitservice.delete_mergeBranch(dataDelete, result => {
                     console.log(result);
                 })
             }, 500);

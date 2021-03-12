@@ -1,7 +1,4 @@
-const Gitservice = require('./git-service')
-const CL = require('../model/commanline')
-const { exec } = require('child_process');
-const fs=require('fs')
+
 
 
 exports.querySlug_Service = (req) => {
@@ -23,10 +20,10 @@ exports.convertString = (data) => {
 //สร้างjoson tree
 exports.makeJosnTree = (dataObj) => {
     const data = dataObj.splPath
-    console.log(data);
     const orinaltag = dataObj.origiPath
     const title = dataObj.title
     const fileDict = dataObj.fileDict
+
     const paths = []
     const oripaths = []
     const Title = []

@@ -19,8 +19,8 @@ const header = (req, res, next) => {
 };
 
 app.use(bodyParser.json());
+//check directoer Dictionary_DB และเตรียม Branch mainBranch และ subBranch
 const myLogger = (req, res, next) => {
-  //ดูว่ามีbranch master หรือยัง
   service.check_Directory(result => {
     if (result) {
       next()
@@ -28,9 +28,12 @@ const myLogger = (req, res, next) => {
   })
 
 }
-app.use(myLogger)//เอาไว้ดัก เวลาtest postman 
+app.use(myLogger)
 app.use('/', header, router);
 const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
   console.log("Application is running on port " + PORT);
+ 
+
 });
