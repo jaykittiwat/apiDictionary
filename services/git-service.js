@@ -13,7 +13,6 @@ const Topparent = ['mainBranch', 'subBranch']//ห้ามซ้ำกับช
 //ตัวสร้าง  bracnh master,sub,main(เอาไว้เทส  ควรที่จะสร้างไฟล์ git ที่มีbranch main , sub ไว้ก่อน เพราะต้องส่งไปให้ UI ก่อน) 
 exports.check_Directory = (callback) => {
     exec('cd Dictionary_DB', (error, stdout, stderr) => {
-        console.log('check Dictionary_DB');
         if (error) {
             console.log("don't have directory Dictionary_DB")
             exec('git init Dictionary_DB ', (error, stdout, stderr) => {
